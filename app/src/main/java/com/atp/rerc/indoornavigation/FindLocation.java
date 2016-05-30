@@ -23,9 +23,15 @@ public class FindLocation extends AppCompatActivity {
     }
 
     public void buttonFindLocation(View v) {
-
         startActivity(new Intent(FindLocation.this, MapsActivity.class));
+    }
 
+    public void buttonMapsOverlay(View v) {
+        startActivity(new Intent(FindLocation.this, MapsOverlayActivity.class));
+    }
+
+    public void buttonImageView(View v) {
+        startActivity(new Intent(FindLocation.this, ImageViewActivity.class));
     }
 
 

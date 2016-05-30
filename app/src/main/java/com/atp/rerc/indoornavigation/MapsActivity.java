@@ -1,60 +1,87 @@
 package com.atp.rerc.indoornavigation;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.indooratlas.android.sdk.IALocation;
+import com.indooratlas.android.sdk.IALocationListener;
+import com.indooratlas.android.sdk.IALocationManager;
+import com.indooratlas.android.sdk.IALocationRequest;
+import com.indooratlas.android.sdk.IARegion;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements IALocationListener {
 
-    private GoogleMap mMap;
+    private static final float HUE_IABLUE = 200.0f;
+
+    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Marker mMarker;
+    private IALocationManager mIALocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+        mIALocationManager = IALocationManager.create(this);
+
+        // optional setup of floor plan id
+        // if setLocation is not called, then location manager tries to find  location automatically
+//        final String floorPlanId = getString(R.string.indooratlas_floor_plan_id);
+//        if (!TextUtils.isEmpty(floorPlanId)) {
+//            final IALocation FLOOR_PLAN_ID = IALocation.from(IARegion.floorPlan(floorPlanId));
+//            mIALocationManager.setLocation(FLOOR_PLAN_ID);
+//        }
     }
 
-    public void onLocationChanged(IALocation location) {
-        if(mMarker != null) {
-            mMarker.remove();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mIALocationManager.destroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMap == null) {
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         }
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.
-                defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        mIALocationManager.requestLocationUpdates(IALocationRequest.create(), this);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mIALocationManager != null) {
+            mIALocationManager.removeLocationUpdates(this);
+        }
+    }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * Callback for receiving locations.
+     * This is where location updates can be handled by moving markers or the camera.
      */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+    public void onLocationChanged(IALocation location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        if (mMarker == null) {
+            if (mMap != null) {
+                mMarker = mMap.addMarker(new MarkerOptions().position(latLng)
+                        .icon(BitmapDescriptorFactory.defaultMarker(HUE_IABLUE)));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f));
+            }
+        } else {
+            mMarker.setPosition(latLng);
+        }
+    }
 
-        // Add a marker in Sydney and move the camera
-        LatLng atp = new LatLng(39.7450970, -104.9794893);
-        mMap.addMarker(new MarkerOptions().position(atp).title("Marker at ATP"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(atp));
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // N/A
     }
 }
