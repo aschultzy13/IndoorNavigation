@@ -39,4 +39,14 @@
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:text="Navigate"
+        android:id="@+id/button_navigation"
+        android:onClick="buttonNavigation"
+        android:layout_alignTop="@+id/button_imageView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

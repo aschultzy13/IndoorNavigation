@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
@@ -77,7 +77,9 @@
         <activity
             android:name=".MapsOverlayActivity"
             android:label="@string/title_activity_maps_overlay" />
-        <activity android:name=".ImageViewActivity"></activity>
+        <activity android:name=".ImageViewActivity" />
+        <activity android:name=".ReachedDestination" />
+        <activity android:name=".NavigationActivity"></activity>
     </application>
 
 </manifest>

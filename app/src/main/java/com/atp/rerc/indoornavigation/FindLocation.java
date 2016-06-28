@@ -34,6 +34,10 @@ public class FindLocation extends AppCompatActivity {
         startActivity(new Intent(FindLocation.this, ImageViewActivity.class));
     }
 
+    public void buttonNavigation(View v) {
+        startActivity(new Intent(FindLocation.this, NavigationActivity.class));
+    }
+
 
     private IALocationListener mIALocationListener = new IALocationListener() {
 

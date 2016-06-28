@@ -45,7 +45,7 @@ public class ImageViewActivity extends FragmentActivity {
     private static final String TAG = "IndoorAtlasExample";
 
     // blue dot radius in meters
-    private static final float dotRadius = 1.0f;
+    private static final float dotRadius = 0.5f;
 
     private IALocationManager mIALocationManager;
     private IAResourceManager mFloorPlanManager;
@@ -54,7 +54,6 @@ public class ImageViewActivity extends FragmentActivity {
     private BlueDotView mImageView;
     private long mDownloadId;
     private DownloadManager mDownloadManager;
-//    private LinearLayout mLinearLayout;
 
     private IALocationListener mLocationListener = new IALocationListenerSupport() {
         @Override
@@ -105,7 +104,9 @@ public class ImageViewActivity extends FragmentActivity {
            if setLocation is not called, then location manager tries to find
            location automatically */
 //        final String floorPlanId = getString(R.string.indooratlas_floor_plan_id);
-        final String floorPlanId = "bbb82d39-0607-42b6-bad7-58b6f51dc580";
+//        final String floorPlanId = "bbb82d39-0607-42b6-bad7-58b6f51dc580";  // atp classroom
+        final String floorPlanId = "40982f5b-6169-4d59-be00-b81ef367112f";  // atp office
+
 
         if (!TextUtils.isEmpty(floorPlanId)) {
             final IALocation location = IALocation.from(IARegion.floorPlan(floorPlanId));
