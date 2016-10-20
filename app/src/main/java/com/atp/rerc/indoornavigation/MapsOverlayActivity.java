@@ -1,15 +1,21 @@
 package com.atp.rerc.indoornavigation;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
+import android.text.InputType;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -18,6 +24,7 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.PolyUtil;
 import com.indooratlas.android.sdk.IALocation;
 import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
@@ -34,7 +41,11 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Target;
 
-public class MapsOverlayActivity extends FragmentActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MapsOverlayActivity extends FragmentActivity implements OnMapReadyCallback,
+        GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener {
 
     private static final String TAG = "IndoorAtlasExample";
 
@@ -62,6 +73,24 @@ public class MapsOverlayActivity extends FragmentActivity {
          */
         @Override
         public void onLocationChanged(IALocation location) {
+
+            // lat long coordinates of colorado 4 corners
+//            double latitude[] = {41.00414793516995,  40.99628891284563, 36.98337823446781, 37.00220566162535};
+//            double longitude[] = {-109.0776588767767, -102.04488672316073, -102.04244691878557, -109.03938073664904};
+            // corners of the hub
+            double latitude[] = {39.74368787333355,  39.74294231769039, 39.742607949347864, 39.74335118841613};
+            double longitude[] = {-105.01030012965202, -105.00974357128143, -105.0104996189475, -105.01105818897486};
+            // put coordinates in 2d arraylist
+            List<LatLng> gpsCoordinates = new ArrayList<>();
+            for (int i = 0; i < latitude.length; i++){
+                gpsCoordinates.add(new LatLng(latitude[i],longitude[i]));
+            }
+
+            // point that is inside or outside area of polygon
+            // need (compile 'com.google.maps.android:android-maps-utils:0.4+') in gradle dependencies for polyutil
+            LatLng testPoint = new LatLng(location.getLatitude(),location.getLongitude());
+            boolean answer = PolyUtil.containsLocation(testPoint,gpsCoordinates,true);
+            System.out.println("The coordinate is in the polygon: " + answer);
 
             Log.d(TAG, "new location received with coordinates: " + location.getLatitude()
                     + "," + location.getLongitude());
@@ -131,7 +160,7 @@ public class MapsOverlayActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_maps_overlay);
 
         // prevent the screen going to sleep while app is on foreground
         findViewById(android.R.id.content).setKeepScreenOn(true);
@@ -139,6 +168,17 @@ public class MapsOverlayActivity extends FragmentActivity {
         // instantiate IALocationManager and IAResourceManager
         mIALocationManager = IALocationManager.create(this);
         mResourceManager = IAResourceManager.create(this);
+
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Log.d("","mapready");
+        mMap = googleMap;
+        mMap.setOnMapClickListener(this);
+        mMap.setOnMapLongClickListener(this);
+
     }
 
     @Override
@@ -155,6 +195,11 @@ public class MapsOverlayActivity extends FragmentActivity {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
+
+            ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+
+
+
         }
 
         // start receiving location updates & monitor region changes
@@ -286,4 +331,118 @@ public class MapsOverlayActivity extends FragmentActivity {
             mFetchFloorPlanTask.cancel();
         }
     }
+
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        Toast.makeText(MapsOverlayActivity.this,
+                "onMapClick:\n" + latLng.latitude + " : " + latLng.longitude,
+                Toast.LENGTH_LONG).show();
+        System.out.println("success!!!");
+    }
+
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        Toast.makeText(MapsOverlayActivity.this,
+                "onMapLongClick:\n" + latLng.latitude + " : " + latLng.longitude,
+                Toast.LENGTH_LONG).show();
+
+        //Add marker on LongClick position
+        MarkerOptions markerOptions =
+                new MarkerOptions().position(latLng).title(latLng.toString());
+        mMap.addMarker(markerOptions);
+    }
+
+
+    private void addMarker(){
+        if(mMap != null){
+
+            //create custom LinearLayout programmatically
+            LinearLayout layout = new LinearLayout(MapsOverlayActivity.this);
+            layout.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            layout.setOrientation(LinearLayout.VERTICAL);
+
+            final EditText titleField = new EditText(MapsOverlayActivity.this);
+            titleField.setHint("Title");
+
+            final EditText latField = new EditText(MapsOverlayActivity.this);
+            latField.setHint("Latitude");
+            latField.setInputType(InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_FLAG_DECIMAL
+                    | InputType.TYPE_NUMBER_FLAG_SIGNED);
+
+            final EditText lonField = new EditText(MapsOverlayActivity.this);
+            lonField.setHint("Longitude");
+            lonField.setInputType(InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_FLAG_DECIMAL
+                    | InputType.TYPE_NUMBER_FLAG_SIGNED);
+
+            layout.addView(titleField);
+            layout.addView(latField);
+            layout.addView(lonField);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add Marker");
+            builder.setView(layout);
+            AlertDialog alertDialog = builder.create();
+
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    boolean parsable = true;
+                    Double lat = null, lon = null;
+
+                    String strLat = latField.getText().toString();
+                    String strLon = lonField.getText().toString();
+                    String strTitle = titleField.getText().toString();
+
+                    try{
+                        lat = Double.parseDouble(strLat);
+                    }catch (NumberFormatException ex){
+                        parsable = false;
+                        Toast.makeText(MapsOverlayActivity.this,
+                                "Latitude does not contain a parsable double",
+                                Toast.LENGTH_LONG).show();
+                    }
+
+                    try{
+                        lon = Double.parseDouble(strLon);
+                    }catch (NumberFormatException ex){
+                        parsable = false;
+                        Toast.makeText(MapsOverlayActivity.this,
+                                "Longitude does not contain a parsable double",
+                                Toast.LENGTH_LONG).show();
+                    }
+
+                    if(parsable){
+
+                        LatLng targetLatLng = new LatLng(lat, lon);
+                        MarkerOptions markerOptions =
+                                new MarkerOptions().position(targetLatLng).title(strTitle);
+
+                        mMap.addMarker(markerOptions);
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(targetLatLng));
+
+                    }
+                }
+            });
+            builder.setNegativeButton("Cancel", null);
+
+            builder.show();
+        }else{
+            Toast.makeText(MapsOverlayActivity.this, "Map not ready", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+
+
+
 }
+
+
+
+

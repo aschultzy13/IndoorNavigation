@@ -22,9 +22,13 @@ import android.view.ViewGroup;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 import com.indooratlas.android.sdk.IALocation;
 import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
@@ -39,6 +43,8 @@ import com.indooratlas.android.sdk.resources.IAResultCallback;
 import com.indooratlas.android.sdk.resources.IATask;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageViewActivity extends FragmentActivity {
 
@@ -105,7 +111,11 @@ public class ImageViewActivity extends FragmentActivity {
            location automatically */
 //        final String floorPlanId = getString(R.string.indooratlas_floor_plan_id);
 //        final String floorPlanId = "bbb82d39-0607-42b6-bad7-58b6f51dc580";  // atp classroom
-        final String floorPlanId = "40982f5b-6169-4d59-be00-b81ef367112f";  // atp office
+//        final String floorPlanId = "40982f5b-6169-4d59-be00-b81ef367112f";  // atp office
+//        final String floorPlanId = "30c080fd-e046-4902-9b35-9e91c8156b1d";  // hub student workspace
+        final String floorPlanId = "b1b3ef88-5e0c-4af5-9d1f-9287ed7babaa";  // hub student workspace new update
+
+
 
 
         if (!TextUtils.isEmpty(floorPlanId)) {
@@ -233,7 +243,6 @@ public class ImageViewActivity extends FragmentActivity {
             mPendingAsyncResult.cancel();
         }
     }
-
 
 }
 
